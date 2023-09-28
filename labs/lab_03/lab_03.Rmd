@@ -1,0 +1,87 @@
+---
+title: "lab_03"
+author: "Derek Willis"
+date: "2023-02-22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load libraries and establish settings
+
+```{r}
+# Turn off scientific notation
+options(scipen=999)
+
+# Load the tidyverse
+library(tidyverse)
+# Load janitor
+library(janitor)
+```
+
+## Load data and clean up the column names
+
+Load the two datasets we worked with in the pre_lab: the Maryland payments to vendors and Maryland grants and loans and, using janitor, change the columns so that they are lower-cased and any spaces are replaced with underscores.
+
+```{r}
+# Load in the Maryland state agency payments data, making sure that it correctly sets the datatypes using all of the rows
+md_payments <- read_csv("data/State_of_Maryland_Payments_Data__FY2008_to_FY2024.csv") |> clean_names()
+
+# Load in the Maryland grants and loan data
+md_grants_loans <- read_csv("data/State_of_Maryland_Grant_and_Loan_Data__FY2009_to_FY2022.csv") |> clean_names()
+
+```
+
+## Answer questions
+
+Q1: You want to know how much money state agencies have paid to the Prince George's County School system, but to do that you'll need to find all of the variations of how the school system might be listed. Write code to find rows where the vendor name contains the county's school system, starting with a broad search and then narrowing it down. When you have found as many as possible, save the result to a new dataframe called `pg_schools`. How many records did you find?
+
+A1: I found 33 records with my specifications.
+
+```{r}
+pg_schools <- md_payments |>
+  filter(str_detect(vendor_name, 'PRINCE GEORGES PUBLIC') |str_detect(vendor_name, 'PRINCE GEORGES COUNTY SCHOOL')) 
+
+pg_schools
+```
+
+Q2: Using that `pg_schools` dataframe, write code to calculate the total amount of payments to the Prince George's County School system for each fiscal year. Which fiscal year had the largest total amount? What do you notice about the years listed, and what questions do you have about that data?
+
+A2: The fiscal year that had the largest total amount was 2020, and I have noticed that the amounts each year don't have much of a pattern and have varied over the years, and some years don't show up on the data set. A question that I have about the data set, is why was such a middling amount of money paid to the school system in 2018?
+
+```{r}
+pg_schools |>
+  group_by(fiscal_year) |>
+  summarize(total = sum(amount)) |>
+  arrange(desc(total))
+```
+
+Q3. You're interested in examining the vendors paid for capital projects at the University of Maryland. Search the payments data to find those payments, then write code to produce a list of each vendor and the total amount it received. Look carefully at that list - what cleaning will it require to ensure that you have only one row per vendor and zip code? Provide at least three examples of vendor names that are similar and should be combined into one. Describe how you might clean that data so that any nearly identical vendors would look identical - what would you change and how?
+
+A3. The cleaning that would be required here is to group all of the companies who have the same name but have different variations under different entries together and make sure nothing slips through the cracks. It will require a clean names and a mutate and a case when. My three examples of vendor names to combine are Whiting Turner Contracting Co and Whiting Turner Contracting Company, Grim + Parker Architects and Grim & Parker Architects, and Ballinger and The Ballinger Co. I would clean the data by using an str_stub to single out the part of the name that is the same in each entry, then I would use a case when to say when the agency name has this on the end of it, make it equal to the original name, and I would list each variation I can find to group them all into one big agency name.
+
+```{r}
+md_payments |>
+  filter(str_detect(agency_name, "CAPITAL PROJECTS- UNIVERSITY OF MARYLAND")) |>
+group_by(vendor_name) |>
+  summarize(total = sum(amount)) |>
+  arrange(desc(total))
+
+```
+
+Q4: You want to understand how much state grant money went to stem cell research projects each fiscal year. Search the data to find grants that fit that description. Once you find which columns contain the information you want, your code should standardize the data needed to find just the grants for stem cell research in a single filter. Then create a total amount of money for each fiscal year. Write a sentence summarizing how stem cell research funding has changed over time.
+
+A4: Since 2009, stem cell research funding has decreased every single year.
+
+```{r}
+stem_cell_grants <- md_grants_loans |> 
+  filter(str_detect(description, "Stem Cell Research")) |>
+  group_by(fiscal_year) |>
+  summarize(total = sum(amount)) |>
+  arrange(desc(total))
+
+stem_cell_grants
+  
+```
