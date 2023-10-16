@@ -1,0 +1,60 @@
+---
+title: "Reverse Engineering Project Notebook"
+output: html_notebook
+---
+
+Load libraries.
+
+```{r}
+options(scipen=999)
+
+library(tidyverse)
+library(readr)
+```
+
+Load data. Change amount column from character to a number in new variable, amount --- (i definitely did this wrong bc its all NA's --- i cant sum the column yet because its a character)
+
+```{r}
+
+sportsdonation <- read_csv("data/sports-political-donations.csv")
+glimpse(sportsdonation$Amount)
+
+sportsdonation <- sportsdonation |> 
+  mutate(amount = as.numeric(Amount))
+
+sportsdonation
+
+```
+
+Who provided the highest number of donations? Charles Johnson.
+
+```{r}
+
+sportsdonation |>
+  group_by(Owner) |>
+  summarise(total_donations = n()) |>
+  arrange(desc(total_donations))
+
+```
+
+Which league gave the most individual donations? MLB
+
+```{r}
+
+sportsdonation |>
+  group_by(League) |>
+  summarise(total_donation = n()) |>
+  arrange(desc(total_donation))
+
+
+```
+
+How many donations for each party?
+
+```{r}
+
+sportsdonation |> 
+  group_by(Party) |>
+  summarise(n()) 
+
+```
