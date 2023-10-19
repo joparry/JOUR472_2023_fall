@@ -1,0 +1,102 @@
+---
+title: "Reverse Engineering Project Notebook"
+output: html_notebook
+---
+
+Load libraries.
+
+```{r}
+options(scipen=999)
+
+library(tidyverse)
+library(readr)
+library(janitor)
+```
+
+Load data. Change amount column from character to a number.
+
+```{r}
+
+#change Amount from <chr> to <dbl> by getting rid of special characters
+
+sportsdonation <- read_csv("data/sports-political-donations.csv") |>
+  mutate(Amount = str_replace_all(Amount,'\\$','')) |>
+  mutate(Amount = str_replace_all(Amount, '\\,','')) |>
+  mutate(Amount = as.numeric(Amount))
+  
+
+```
+
+"American professional sports owners have contributed **nearly \$47 million in federal elections** since 2015, according to research by ESPN in partnership with FiveThirtyEight, including **\$10 million to Republican causes** and **\$1.9 million to Democratic causes** so far in the 2020 election cycle."
+
+```{r}
+
+#sum total donations: $46,978,697
+
+sportsdonation |>
+  summarise(Amount) |>
+  sum()
+
+#find total Democrat donations specific to 2020 election cycle: $1,877,133 
+
+sportsdonation |>
+  filter(str_detect(Party, "Democrat")) |>
+  filter(`Election Year`== "2020") |>
+  summarise(Amount) |>
+  sum()
+
+#find total Republican donations specific to 2020 election cycle: $10,111,284
+
+sportsdonation |>
+  filter(str_detect(Party, "Republican")) |>
+  filter(`Election Year` == "2020") |>
+  summarise(Amount) |>
+  sum()
+
+```
+
+"The research includes more than **160 owners** and commissioners spanning **125 teams**"
+
+```{r}
+
+#number of owners
+sportsdonation |>
+  group_by(Owner) |>
+  summarise(n())
+
+sportsdonation
+
+```
+
+Who provided the highest number of donations? Charles Johnson.
+
+```{r}
+
+sportsdonation |>
+  group_by(Owner) |>
+  summarise(total_donations = n()) |>
+  arrange(desc(total_donations))
+
+```
+
+Which league gave the most individual donations? MLB
+
+```{r}
+
+sportsdonation |>
+  group_by(League) |>
+  summarise(total_donation = n()) |>
+  arrange(desc(total_donation))
+
+
+```
+
+How many donations for each party? Republicans gave the most donations
+
+```{r}
+
+sportsdonation |> 
+  group_by(Party) |>
+  summarise(n()) 
+
+```
