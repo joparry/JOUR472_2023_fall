@@ -3,6 +3,8 @@ title: "Reverse Engineering Project Notebook"
 output: html_notebook
 ---
 
+Deliverable 5: Final Notebook/Memo <https://docs.google.com/document/d/1197C83YSa2MKSKzEyou_yHwQQzzwBio_74Ynt1MvMDQ/edit?usp=sharing>
+
 Load libraries.
 
 ```{r}
@@ -33,7 +35,7 @@ sportsdonation
 
 ```{r}
 
-#number of owners/commissioners —— 158 rows, have to figure out way to get both owners and commisioners for the "more than 160 owners and commisioners"
+#number of owners/commissioners —— 158 rows, have to figure out way to get both owners and commisioners for the "more than 160 owners and commisioners" This might be because
 sportsdonation |>
   filter(str_detect(party, 'Republican')) |>
   group_by(owner) |> 
@@ -92,9 +94,11 @@ sportsdonation |>
 4.  Overall, **51.7 percent of all contributions by WNBA owners went to Democrats**, with **42.3 percent going to Republicans.** And of the **\$1.3 million contributed by WNBA owners to Republicans, 65.5 percent comes from Kelly Loeffler,** the Republican from Georgia who is co-owner of the Atlanta Dream.
 
 ```{r}
+
+
 sportsdonation |>
   filter(league == 'WNBA') |>
-  group_by(owner) |>
+  filter(owner == 'Kelly Loeffler') |>
   summarise(wnba_amt = sum(amount)) |>
   arrange(desc(wnba_amt))
 
@@ -105,15 +109,24 @@ sportsdonation |>
   filter(str_detect(party, 'Republican')) |>
   summarise(sum(amount))
 
-#when adding up Republican WNBA spending, the total is $1,055,552 — this is not $1.3m, have to figure out why.
+#when adding up Republican WNBA spending, the total is $1,055,552 — this is not $1.3m, have to figure out why. We are not sure what the discrepancy is here, but we think it might be because there is not data for "Bipartisan, but mostly Democrat" included, which makes the total a little less than what FiveThirtyEight calculated. 
+
+#FiveThirtyEight had a searchable database, and we found that some of the donations that were there were not present in our data, particularly  Kelly Loeffler's bipartisan donations. Even when we tried to redownload the data, we got the same results, so this seems to be something with the data.
 
 100*(896150/1055552)
+
+100*(896150/1300000)
 
 sportsdonation |>
   filter(league == 'WNBA') |>
   group_by(party) |>
   summarise(total = sum(amount))
-# there seems to be no WNBA donations for "Bipartisan, but mostly Democrat."
+# there seems to be no WNBA donations for "Bipartisan, but mostly Democrat." 
+
+sportsdonation |>
+  filter(league == 'WNBA') |>
+  group_by(owner) |>
+  summarise(total = sum(amount))
 
 ```
 
@@ -135,6 +148,8 @@ sportsdonation |>
   summarise(total = sum(amount)) |>
   filter(total >= 100000)
 
+#These discrepancies are a little odd, as they are just slightly off from what FiveThirtyEight reported. We think that this could be because of the same issue with the WNBA calculations due to the data itself.
+
 
 # Which year had the most donations? 2018
 sportsdonation |>
@@ -150,7 +165,7 @@ sportsdonation |>
 
 # Money sent to purely Republican causes: 
 # sum: 34,246,016 ~ $34.2 million, the total donation amount was $46,978,697
-# 34,246,016/46,978,697 = 0.728969 = 72.3%
+# 34,246,016/46,978,697 = 0.728969 = 72.9%
 sportsdonation |>
   filter(party == 'Republican') |>
   summarise(sum(amount))
@@ -166,4 +181,30 @@ sportsdonation |>
   summarise(sum(amount))
 
 100*(10113639/46978697)
+```
+
+```{r}
+
+#data visualization
+
+league_donation <- sportsdonation |>
+  group_by(league) |>
+  summarise(total_donation = n()) |>
+  arrange(desc(total_donation))
+
+league_donation |>
+  ggplot() +
+  geom_bar(aes(x=league, weight=total_donation)) +
+  theme(
+    axis.text.x = element_text(angle = 45,  hjust=1)
+  ) +
+   labs(
+    title="Political Donation by Sports League",
+    x = "League",
+    y = "Total Number of Donation",
+    caption = "source: FiveThirtyEight and ESPN"
+  ) 
+
+
+
 ```
