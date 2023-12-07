@@ -2,30 +2,117 @@
 title: "Data Analysis Project"
 output: html_notebook
 ---
-
-```{r}
-#Load and clean the data
-womens_basketball_stats <- read_csv("data/womens_basketball_stats.csv") |> clean_names()
-
-umd_roster <- read_csv("data/umd_roster.csv") |> clean_names()
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Turn off scientific notation
+options(scipen=999)
 ```
 
 ```{r}
-#Shows basic exploratory analysis to demonstrate an understanding of the dataset, including the number of rows and columns, any obvious limitations or flaws and any reasons why it might not be able to answer the questions you've listed last week.
-umd_roster |>
+library(tidyverse)
+library(lubridate)
+library(janitor)
+library(tigris)
+```
+
+```{r}
+#Load and clean the data
+umd_roster <- read_csv('/Users/jpparry/Downloads/Untitled/Data Analysis Project/data/UMD_wbb_roster.csv') |> clean_names()
+umd_womens_basketball_stats <- read_csv('/Users/jpparry/Downloads/Untitled/Data Analysis Project/data/womens_basketball_stats.csv') |> clean_names()
+```
+
+```{r}
+#Q1  How Tall are the players on the UMD Team?
+UMD_height <- umd_roster |>
+  group_by(ht) |>
+  summarise(count = n()) |>
+  arrange(desc(ht))
+
+UMD_height
+```
+Answer Q1: With this data we can see that there are only three players on the Maryland roster under 6 feet tall, and that 10 players on the roster are between 6'0" and 6'2" when it comes to their height, with one player being the tallest outlier at 6'7". 
+
+```{r}
+#Q2 How do Maryland's heights compare to the top teams in NCAA women's hoops?
+# First, load and clean the data.
+iowa_roster <- read_csv('/Users/jpparry/Downloads/Untitled/Data Analysis Project/data/Iowa_wbb_roster.csv') |> clean_names()
+sc_roster <- read_csv('/Users/jpparry/Downloads/Untitled/Data Analysis Project/data/SC_wbb_roster.csv') |> clean_names()
+ncstate_roster <- read_csv('/Users/jpparry/Downloads/Untitled/Data Analysis Project/data/NCS_wbb_roster.csv') |> clean_names()
+ucla_roster <- read_csv('/Users/jpparry/Downloads/Untitled/Data Analysis Project/data/UCLA_wbb_roster.csv') |> clean_names()
+texas_roster <- read_csv('/Users/jpparry/Downloads/Untitled/Data Analysis Project/data/Texas_wbb_roster.csv') |> clean_names()
+
+sc_roster <- sc_roster|>
+  rename(ht = height)
+
+iowa_roster <- iowa_roster|>
+  rename(ht = height)
+```
+```{r}
+# Next, make data sets for each of the five teams
+iowa_height <- iowa_roster |>
+  group_by(ht) |>
+  summarise(count = n()) |>
+  arrange(desc(ht))
+
+sc_height <- sc_roster |>
+  group_by(ht) |>
+  summarise(count = n()) |>
+  arrange(desc(ht))
+
+ncs_height <- ncstate_roster |>
+  group_by(ht) |>
+  summarise(count = n()) |>
+  arrange(desc(ht))
+
+ucla_height <- ucla_roster |>
+  group_by(ht) |>
+  summarise(count = n()) |>
+  arrange(desc(ht))
+
+texas_height <- texas_roster |>
   group_by(ht) |>
   summarise(count = n()) |>
   arrange(desc(ht))
 
 ```
+Answer Q2: This does show us the heights of everyone on all of these teams each put into different data sets. In these datsets you can clearly see that Maryland have a height problem when it compeares to the top teams in the country. Texas have four players that are 6'4" or taller, and UCLA have six players that are 6'3" or taller. South Carolina have four players 6'3" or taller, NC State also have four, and Iowa have two players 6'3" or taller. All of these team top Maryland's total of one player taller than 6'3". 
 
 ```{r}
-#Shows basic exploratory analysis to demonstrate an understanding of the dataset, including the number of rows and columns, any obvious limitations or flaws and any reasons why it might not be able to answer the questions you've listed last week.
-womens_basketball_stats |>
+#Q3 Which Maryland player scores the most?
+umd_womens_basketball_stats |>
   group_by(avg_23, number_player) |>
   arrange(desc(avg_23))
 ```
-
+Answer Q3: The answer here is that Shyanne Sellers averages the most points per game out of anyone on the roster.
 Q1: Describe the limits of the data in terms of timeframe, what is and is not included and any codes or other information you'd need to find definitions for, and what you've done to better define it.
 
 In terms of timeframe, the datasets that we are working with are limited to the current Maryland women\'s basketball team, using information from the roster that was released at the beginning of the season. The first dataset, the roster data, includes biographical information about each player including their name, position, height, year, hometown and previous college that they transferred from if applicable. The second dataset we are considering is a compilation of stats only from the first seven games. These stats include metrics like games played, games started, minutes played, points, shooting percentage and rebounds. There are no metrics that we need to find definitions for, but we could add stats from the upcoming games if we so choose. Other information we need is the majors of each of the players, which was not included in the roster or statistics dataset. To answer another one of our original questions, we will also look for another dataset about the players' financial records from the last few years to get information on the resources and whether or not there are inequities for the women's basketball team.
+
+```{r}
+#Q5 How many players are from out of state compared to other top programs?
+# Part one, sort through the data for Maryland.
+umd_from_md <- umd_roster |>
+  filter(str_detect(hometown_high_school,"MD"))
+
+umd_from_md
+```
+Answer Q5 Part One: Here we can see that five of the 14 players on the Maryland roster are from the state of Maryland, that's a pretty high percentage. Let's see how it compares to some of the others.
+
+```{r}
+#Q5 Part Two- A look at South Carolina
+sc_from_sc <- sc_roster |>
+  filter(str_detect(hometown,"S.C."))
+
+sc_from_sc
+```
+Answer Q5 Part Two: Here we can see that the number one team in the country has only two players on the roster that are from their state. A startlingly low number for such a big and presitigous program in that state. 
+
+```{r}
+#Q5 Part Three- A look at Iowa
+iowa_from_iowa <- iowa_roster |>
+  filter(str_detect(hometown,"Iowa"))
+
+iowa_from_iowa
+```
+It's even more surprising that Maryland has more in state recruits than Iowa, a program that's been on the top of the country with Iowan Caitlin Clark for the last few years.
+
