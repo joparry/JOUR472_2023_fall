@@ -19,6 +19,7 @@ library(tigris)
 #Load and clean the data
 umd_roster <- read_csv('/Users/jpparry/Downloads/Untitled/Data Analysis Project/data/UMD_wbb_roster.csv') |> clean_names()
 umd_womens_basketball_stats <- read_csv('/Users/jpparry/Downloads/Untitled/Data Analysis Project/data/womens_basketball_stats.csv') |> clean_names()
+wbb_majors <- read_csv("data/wbb_majors.csv") |> clean_names() 
 ```
 
 ```{r}
@@ -33,7 +34,7 @@ UMD_height
 Answer Q1: With this data we can see that there are only three players on the Maryland roster under 6 feet tall, and that 10 players on the roster are between 6'0" and 6'2" when it comes to their height, with one player being the tallest outlier at 6'7". 
 
 ```{r}
-#Q2 How do Maryland's heights compare to the top teams in NCAA women's hoops?
+#Q1 How do Maryland's heights compare to the top teams in NCAA women's hoops?
 # First, load and clean the data.
 iowa_roster <- read_csv('/Users/jpparry/Downloads/Untitled/Data Analysis Project/data/Iowa_wbb_roster.csv') |> clean_names()
 sc_roster <- read_csv('/Users/jpparry/Downloads/Untitled/Data Analysis Project/data/SC_wbb_roster.csv') |> clean_names()
@@ -75,18 +76,53 @@ texas_height <- texas_roster |>
   arrange(desc(ht))
 
 ```
-Answer Q2: This does show us the heights of everyone on all of these teams each put into different data sets. In these datsets you can clearly see that Maryland have a height problem when it compeares to the top teams in the country. Texas have four players that are 6'4" or taller, and UCLA have six players that are 6'3" or taller. South Carolina have four players 6'3" or taller, NC State also have four, and Iowa have two players 6'3" or taller. All of these team top Maryland's total of one player taller than 6'3". 
+Answer Q1: This does show us the heights of everyone on all of these teams each put into different data sets. In these datsets you can clearly see that Maryland have a height problem when it compeares to the top teams in the country. Texas have four players that are 6'4" or taller, and UCLA have six players that are 6'3" or taller. South Carolina have four players 6'3" or taller, NC State also have four, and Iowa have two players 6'3" or taller. All of these team top Maryland's total of one player taller than 6'3". 
 
 ```{r}
-#Q3 Which Maryland player scores the most?
+#Q2 Which Maryland player scores the most?
 umd_womens_basketball_stats |>
   group_by(avg_23, number_player) |>
   arrange(desc(avg_23))
 ```
-Answer Q3: The answer here is that Shyanne Sellers averages the most points per game out of anyone on the roster.
-Q1: Describe the limits of the data in terms of timeframe, what is and is not included and any codes or other information you'd need to find definitions for, and what you've done to better define it.
+Answer Q2: Our data shows that Shyanne Sellers averages the most points per game (31.9) followed by Jakia Brown Turner (26.9), Lavender Briggs (23.4), Allie Kubek (22.4) and Brinae Alexander (22.3). To determine this, we sorted the average points per game in the order from most to least, finding these five players at the top as a result
 
-In terms of timeframe, the datasets that we are working with are limited to the current Maryland women\'s basketball team, using information from the roster that was released at the beginning of the season. The first dataset, the roster data, includes biographical information about each player including their name, position, height, year, hometown and previous college that they transferred from if applicable. The second dataset we are considering is a compilation of stats only from the first seven games. These stats include metrics like games played, games started, minutes played, points, shooting percentage and rebounds. There are no metrics that we need to find definitions for, but we could add stats from the upcoming games if we so choose. Other information we need is the majors of each of the players, which was not included in the roster or statistics dataset. To answer another one of our original questions, we will also look for another dataset about the players' financial records from the last few years to get information on the resources and whether or not there are inequities for the women's basketball team.
+3.  In a few steps, Join the two data sets together (hintby changing the column names and the column item format to match each.
+
+```{r}
+umd_womens_basketball_stats<- umd_womens_basketball_stats |>
+  rename(name = "number_player")
+```
+
+```{r}
+umd_womens_basketball_stats <- umd_womens_basketball_stats |>
+  separate(name, c('name1', 'name2', 'name3'))
+
+```
+
+```{r}
+umd_womens_basketball_stats <-umd_womens_basketball_stats |>
+  mutate(new_name = paste(name3, name2, sep=" "))
+
+```
+
+```{r}
+umd_basketball_stats <- umd_roster |>
+  inner_join(umd_womens_basketball_stats, by=c("name" = "new_name"))
+
+```
+
+```{r}
+#Q4 What do the players study at UMD?
+umd_womens_basketball_stats <- umd_womens_basketball_stats |>
+  inner_join(wbb_majors, by=c("new_name"))
+
+
+umd_womens_basketball_stats |>
+group_by(new_name, major) |>
+  summarise(major) |>
+arrange(major)
+```
+
 
 ```{r}
 #Q5 How many players are from out of state compared to other top programs?
@@ -115,4 +151,6 @@ iowa_from_iowa <- iowa_roster |>
 iowa_from_iowa
 ```
 It's even more surprising that Maryland has more in state recruits than Iowa, a program that's been on the top of the country with Iowan Caitlin Clark for the last few years.
+
+In terms of timeframe, the datasets that we are working with are limited to the current Maryland women\'s basketball team, using information from the roster that was released at the beginning of the season. The first dataset, the roster data, includes biographical information about each player including their name, position, height, year, hometown and previous college that they transferred from if applicable. The second dataset we are considering is a compilation of stats only from the first seven games. These stats include metrics like games played, games started, minutes played, points, shooting percentage and rebounds. There are no metrics that we need to find definitions for, but we could add stats from the upcoming games if we so choose. Other information we need is the majors of each of the players, which was not included in the roster or statistics dataset. To answer another one of our original questions, we will also look for another dataset about the players' financial records from the last few years to get information on the resources and whether or not there are inequities for the women's basketball team.
 
