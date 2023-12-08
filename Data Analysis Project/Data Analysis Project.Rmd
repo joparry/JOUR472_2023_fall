@@ -110,7 +110,7 @@ umd_basketball_stats <- umd_roster |>
   inner_join(umd_womens_basketball_stats, by=c("name" = "new_name"))
 
 ```
-
+Q3 Answer: There is not much of a narrative for this code, it just made a lot of the other questions a lot easier to answer, we will expand on some of our questions to make more questions within those questions in the future.
 ```{r}
 #Q4 What do the players study at UMD?
 umd_womens_basketball_stats <- umd_womens_basketball_stats |>
@@ -122,7 +122,7 @@ group_by(new_name, major) |>
   summarise(major) |>
 arrange(major)
 ```
-
+Q4 Answer: The finsings here are quite clear. It seems that Letters & Sciences is the most predominant major for players on the team. Management Studies and Psychology are each tied in second place with two players studying in those fields each. Next steps here could be to look at the data set of the school's majors split up amongst the student population as a whole and see how the team compares.
 
 ```{r}
 #Q5 How many players are from out of state compared to other top programs?
@@ -151,6 +151,12 @@ iowa_from_iowa <- iowa_roster |>
 iowa_from_iowa
 ```
 It's even more surprising that Maryland has more in state recruits than Iowa, a program that's been on the top of the country with Iowan Caitlin Clark for the last few years.
+
+
+
+Our most surprising finding so far I believe to be the data when it relates to the amount of in state players that Maryland has. Some would argue that the reason that these top programs aren't filled with in state talent is because they can get better talent from outside soruces. While this is true in some cases, some of these teams have their best pleayer from their state, and still have less in state players than UMD. This shows just how good Maryland is at retaining basketball talent from the DMV area, a place which has a lot of this type of talent.
+
+
 
 In terms of timeframe, the datasets that we are working with are limited to the current Maryland women\'s basketball team, using information from the roster that was released at the beginning of the season. The first dataset, the roster data, includes biographical information about each player including their name, position, height, year, hometown and previous college that they transferred from if applicable. The second dataset we are considering is a compilation of stats only from the first seven games. These stats include metrics like games played, games started, minutes played, points, shooting percentage and rebounds. There are no metrics that we need to find definitions for, but we could add stats from the upcoming games if we so choose. Other information we need is the majors of each of the players, which was not included in the roster or statistics dataset. To answer another one of our original questions, we will also look for another dataset about the players' financial records from the last few years to get information on the resources and whether or not there are inequities for the women's basketball team.
 
